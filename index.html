@@ -1,13 +1,225 @@
 <!DOCTYPE html>
-<html lang="en">\n<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pong Game</title>
-  <link rel="stylesheet" href="styles.css">\n</head>\n<body>
-    <div id="scoreboard">
-      <span id="player1-score">0</span> : <span id="player2-score">0</span>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏓 Ping Pong Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            padding: 40px;
+        }
+
+        h1 {
+            font-size: 48px;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            letter-spacing: 3px;
+        }
+
+        .scoreboard {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 60px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 25px 50px;
+            border-radius: 15px;
+        }
+
+        .score-box {
+            text-align: center;
+        }
+
+        .score-label {
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .score-value {
+            font-size: 56px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 15px 30px;
+            border-radius: 10px;
+            min-width: 100px;
+        }
+
+        canvas {
+            border: 4px solid white;
+            border-radius: 8px;
+            background: #000;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+
+        .instructions {
+            text-align: center;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏓 PING PONG</h1>
+        
+        <div class="scoreboard">
+            <div class="score-box">
+                <div class="score-label">YOU</div>
+                <div class="score-value" id="playerScore">0</div>
+            </div>
+            <div style="font-size: 24px; opacity: 0.6;">VS</div>
+            <div class="score-box">
+                <div class="score-label">COMPUTER</div>
+                <div class="score-value" id="computerScore">0</div>
+            </div>
+        </div>
+
+        <canvas id="gameCanvas" width="800" height="400"></canvas>
+
+        <div class="instructions">
+            <p>🖱️ Move mouse | ⬆️⬇️ Arrow keys</p>
+        </div>
     </div>
-    <canvas id="gameCanvas" width="800" height="400"></canvas>
-    <script src="game.js"></script>
-  </body>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let playerScore = 0, computerScore = 0;
+
+        const ball = {
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            radius: 8,
+            dx: 4,
+            dy: 4
+        };
+
+        const player = {
+            x: 0,
+            y: canvas.height / 2 - 40,
+            width: 12,
+            height: 80
+        };
+
+        const computer = {
+            x: canvas.width - 12,
+            y: canvas.height / 2 - 40,
+            width: 12,
+            height: 80
+        };
+
+        const keys = {};
+
+        document.addEventListener('keydown', (e) => {
+            keys[e.key] = true;
+        });
+
+        document.addEventListener('keyup', (e) => {
+            keys[e.key] = false;
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            player.y = Math.max(0, Math.min(e.clientY - rect.top - 40, canvas.height - 80));
+        });
+
+        function draw() {
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+            ctx.setLineDash([15, 15]);
+            ctx.beginPath();
+            ctx.moveTo(canvas.width / 2, 0);
+            ctx.lineTo(canvas.width / 2, canvas.height);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.fillStyle = '#00FF88';
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+
+            ctx.fillStyle = '#FF006E';
+            ctx.fillRect(computer.x, computer.y, computer.width, computer.height);
+
+            ctx.fillStyle = '#FFD700';
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function update() {
+            if (keys['ArrowUp'] || keys['w']) player.y = Math.max(0, player.y - 7);
+            if (keys['ArrowDown'] || keys['s']) player.y = Math.min(canvas.height - 80, player.y + 7);
+
+            ball.x += ball.dx;
+            ball.y += ball.dy;
+
+            if (ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height) {
+                ball.dy = -ball.dy;
+            }
+
+            if (ball.x - ball.radius < 15 && ball.y > player.y && ball.y < player.y + 80) {
+                ball.dx = Math.abs(ball.dx) * 1.05;
+            }
+
+            if (ball.x + ball.radius > canvas.width - 15 && ball.y > computer.y && ball.y < computer.y + 80) {
+                ball.dx = -Math.abs(ball.dx) * 1.05;
+            }
+
+            if (ball.x < 0) {
+                computerScore++;
+                document.getElementById('computerScore').textContent = computerScore;
+                ball.x = canvas.width / 2;
+                ball.y = canvas.height / 2;
+                ball.dx = 4;
+                ball.dy = 4;
+            }
+
+            if (ball.x > canvas.width) {
+                playerScore++;
+                document.getElementById('playerScore').textContent = playerScore;
+                ball.x = canvas.width / 2;
+                ball.y = canvas.height / 2;
+                ball.dx = -4;
+                ball.dy = 4;
+            }
+
+            const computerCenter = computer.y + 40;
+            if (computerCenter < ball.y - 50) {
+                computer.y = Math.min(canvas.height - 80, computer.y + 5);
+            } else if (computerCenter > ball.y + 50) {
+                computer.y = Math.max(0, computer.y - 5);
+            }
+        }
+
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        gameLoop();
+    </script>
+</body>
 </html>
