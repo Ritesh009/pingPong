@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🏓 Ping Pong Game</title>
+    <title>🏓 Ping Pong - Modern Game</title>
     <style>
         * {
             margin: 0;
@@ -12,96 +12,343 @@
         }
 
         body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0f1e 0%, #1a1a3e 50%, #2d1b69 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             color: white;
+            overflow: hidden;
+        }
+
+        .stars {
+            position: fixed;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.6;
         }
 
         .container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 30px;
-            padding: 40px;
+            gap: 40px;
+            padding: 50px 30px;
+            max-width: 1000px;
         }
 
-        h1 {
-            font-size: 48px;
-            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        .header {
+            text-align: center;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .title {
+            font-size: 64px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #00d4ff 0%, #7c3aed 50%, #ff006e 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 2px;
+            text-shadow: 0 0 30px rgba(124, 58, 237, 0.5);
+            margin-bottom: 10px;
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: #00d4ff;
             letter-spacing: 3px;
+            text-transform: uppercase;
+            font-weight: 300;
+            opacity: 0.8;
         }
 
-        .scoreboard {
+        .scoreboard-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(0, 212, 255, 0.2);
+            border-radius: 25px;
+            padding: 40px 60px;
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 60px;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 25px 50px;
+            gap: 80px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 30px rgba(124, 58, 237, 0.2);
+            animation: fadeInUp 0.8s ease-out;
+            transition: all 0.3s ease;
+        }
+
+        .scoreboard-container:hover {
+            border-color: rgba(0, 212, 255, 0.5);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 50px rgba(124, 58, 237, 0.4);
+        }
+
+        .score-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .player-label {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #00d4ff;
+            opacity: 0.8;
+        }
+
+        .score-display {
+            font-size: 72px;
+            font-weight: 900;
+            min-width: 120px;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(124, 58, 237, 0.1));
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            padding: 20px 30px;
             border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.2), inset 0 0 20px rgba(0, 212, 255, 0.1);
+            transition: all 0.3s ease;
         }
 
-        .score-box {
-            text-align: center;
+        .score-display:hover {
+            border-color: rgba(0, 212, 255, 0.6);
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.4), inset 0 0 30px rgba(0, 212, 255, 0.2);
+            transform: scale(1.05);
         }
 
-        .score-label {
-            font-size: 14px;
-            font-weight: bold;
+        .vs-divider {
+            font-size: 24px;
+            font-weight: 300;
+            color: rgba(0, 212, 255, 0.4);
             letter-spacing: 2px;
-            margin-bottom: 10px;
         }
 
-        .score-value {
-            font-size: 56px;
-            font-weight: bold;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            padding: 15px 30px;
-            border-radius: 10px;
-            min-width: 100px;
+        .game-wrapper {
+            position: relative;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
         }
 
-        canvas {
-            border: 4px solid white;
-            border-radius: 8px;
-            background: #000;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        #gameCanvas {
+            display: block;
+            border: 3px solid rgba(0, 212, 255, 0.4);
+            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(20, 10, 40, 0.9) 100%);
+            box-shadow: 0 0 50px rgba(124, 58, 237, 0.4), 0 0 100px rgba(0, 212, 255, 0.2);
+            cursor: none;
+            transition: all 0.3s ease;
         }
 
-        .instructions {
+        #gameCanvas:hover {
+            border-color: rgba(0, 212, 255, 0.8);
+            box-shadow: 0 0 60px rgba(124, 58, 237, 0.6), 0 0 120px rgba(0, 212, 255, 0.3);
+        }
+
+        .controls-info {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(0, 212, 255, 0.2);
+            border-radius: 15px;
+            padding: 25px 35px;
             text-align: center;
+            animation: fadeInUp 0.8s ease-out 0.4s both;
+        }
+
+        .control-row {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .control-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-key {
+            font-weight: 700;
             font-size: 16px;
+            color: #00d4ff;
+            background: rgba(0, 212, 255, 0.1);
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            min-width: 120px;
+            text-align: center;
+        }
+
+        .control-desc {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.6);
+            letter-spacing: 0.5px;
+        }
+
+        .footer {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 12px;
+            letter-spacing: 1px;
+            animation: fadeInUp 0.8s ease-out 0.6s both;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                text-shadow: 0 0 30px rgba(124, 58, 237, 0.5), 0 0 60px rgba(0, 212, 255, 0.2);
+            }
+            50% {
+                text-shadow: 0 0 50px rgba(124, 58, 237, 0.8), 0 0 80px rgba(0, 212, 255, 0.4);
+            }
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+        }
+
+        @media (max-width: 900px) {
+            .title {
+                font-size: 48px;
+            }
+
+            .scoreboard-container {
+                padding: 30px 40px;
+                gap: 50px;
+            }
+
+            .score-display {
+                font-size: 48px;
+                min-width: 90px;
+                padding: 15px 20px;
+            }
+
+            #gameCanvas {
+                max-width: 100%;
+                height: auto;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                gap: 25px;
+                padding: 30px 15px;
+            }
+
+            .title {
+                font-size: 36px;
+            }
+
+            .scoreboard-container {
+                flex-direction: column;
+                gap: 20px;
+                padding: 25px;
+            }
+
+            .score-display {
+                font-size: 40px;
+            }
+
+            #gameCanvas {
+                width: 100%;
+                max-width: 500px;
+            }
+
+            .control-row {
+                gap: 20px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🏓 PING PONG</h1>
-        
-        <div class="scoreboard">
-            <div class="score-box">
-                <div class="score-label">YOU</div>
-                <div class="score-value" id="playerScore">0</div>
+        <div class="header">
+            <h1 class="title">🏓 PING PONG</h1>
+            <p class="subtitle">× ULTIMATE GAME ×</p>
+        </div>
+
+        <div class="scoreboard-container">
+            <div class="score-section">
+                <div class="player-label">YOU</div>
+                <div class="score-display" id="playerScore">0</div>
             </div>
-            <div style="font-size: 24px; opacity: 0.6;">VS</div>
-            <div class="score-box">
-                <div class="score-label">COMPUTER</div>
-                <div class="score-value" id="computerScore">0</div>
+            <div class="vs-divider">VS</div>
+            <div class="score-section">
+                <div class="player-label">COMPUTER</div>
+                <div class="score-display" id="computerScore">0</div>
             </div>
         </div>
 
-        <canvas id="gameCanvas" width="800" height="400"></canvas>
+        <div class="game-wrapper">
+            <canvas id="gameCanvas" width="800" height="400"></canvas>
+        </div>
 
-        <div class="instructions">
-            <p>🖱️ Move mouse | ⬆️⬇️ Arrow keys</p>
+        <div class="controls-info">
+            <div class="control-row">
+                <div class="control-item">
+                    <div class="control-key">🖱️ MOUSE</div>
+                    <div class="control-desc">Move paddle vertically</div>
+                </div>
+                <div class="control-item">
+                    <div class="control-key">⬆️ ⬇️ ARROWS</div>
+                    <div class="control-desc">Alternative control</div>
+                </div>
+                <div class="control-item">
+                    <div class="control-key">W / S</div>
+                    <div class="control-desc">WASD support</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>✦ FIRST TO 5 POINTS WINS • SMOOTH 60 FPS GAMEPLAY ✦</p>
         </div>
     </div>
 
     <script>
+        // Add animated stars background
+        function createStars() {
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'stars';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.opacity = Math.random() * 0.7;
+                star.style.animation = `twinkle ${2 + Math.random() * 3}s ease-in-out infinite`;
+                document.body.appendChild(star);
+            }
+        }
+
+        createStars();
+
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
@@ -145,32 +392,60 @@
         });
 
         function draw() {
-            ctx.fillStyle = '#000';
+            // Background with gradient
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            gradient.addColorStop(0, '#0a0a15');
+            gradient.addColorStop(0.5, '#1a0a30');
+            gradient.addColorStop(1, '#0a0a15');
+            ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-            ctx.setLineDash([15, 15]);
+            // Center line
+            ctx.strokeStyle = 'rgba(0, 212, 255, 0.15)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([20, 20]);
             ctx.beginPath();
             ctx.moveTo(canvas.width / 2, 0);
             ctx.lineTo(canvas.width / 2, canvas.height);
             ctx.stroke();
             ctx.setLineDash([]);
 
+            // Player paddle (Cyan/Green glow)
             ctx.fillStyle = '#00FF88';
+            ctx.shadowColor = 'rgba(0, 255, 136, 0.8)';
+            ctx.shadowBlur = 15;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
             ctx.fillRect(player.x, player.y, player.width, player.height);
+            ctx.shadowColor = 'transparent';
 
+            // Computer paddle (Pink/Magenta glow)
             ctx.fillStyle = '#FF006E';
+            ctx.shadowColor = 'rgba(255, 0, 110, 0.8)';
+            ctx.shadowBlur = 15;
             ctx.fillRect(computer.x, computer.y, computer.width, computer.height);
+            ctx.shadowColor = 'transparent';
 
+            // Ball with glow
             ctx.fillStyle = '#FFD700';
+            ctx.shadowColor = 'rgba(255, 215, 0, 1)';
+            ctx.shadowBlur = 20;
             ctx.beginPath();
             ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
             ctx.fill();
+            ctx.shadowColor = 'transparent';
+
+            // Ball border
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+            ctx.stroke();
         }
 
         function update() {
-            if (keys['ArrowUp'] || keys['w']) player.y = Math.max(0, player.y - 7);
-            if (keys['ArrowDown'] || keys['s']) player.y = Math.min(canvas.height - 80, player.y + 7);
+            if (keys['ArrowUp'] || keys['w'] || keys['W']) player.y = Math.max(0, player.y - 7);
+            if (keys['ArrowDown'] || keys['s'] || keys['S']) player.y = Math.min(canvas.height - 80, player.y + 7);
 
             ball.x += ball.dx;
             ball.y += ball.dy;
@@ -181,10 +456,12 @@
 
             if (ball.x - ball.radius < 15 && ball.y > player.y && ball.y < player.y + 80) {
                 ball.dx = Math.abs(ball.dx) * 1.05;
+                ball.dy += (ball.y - (player.y + 40)) * 0.05;
             }
 
             if (ball.x + ball.radius > canvas.width - 15 && ball.y > computer.y && ball.y < computer.y + 80) {
                 ball.dx = -Math.abs(ball.dx) * 1.05;
+                ball.dy += (ball.y - (computer.y + 40)) * 0.05;
             }
 
             if (ball.x < 0) {
@@ -204,6 +481,9 @@
                 ball.dx = -4;
                 ball.dy = 4;
             }
+
+            if (Math.abs(ball.dx) > 8) ball.dx = ball.dx > 0 ? 8 : -8;
+            if (Math.abs(ball.dy) > 8) ball.dy = ball.dy > 0 ? 8 : -8;
 
             const computerCenter = computer.y + 40;
             if (computerCenter < ball.y - 50) {
